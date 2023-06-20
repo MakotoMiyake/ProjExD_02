@@ -6,17 +6,25 @@ import pygame as pg
 WIDTH, HEIGHT = 1600, 900
 
 
-def chek_bound(area: pg.Rect, obj: pg.rect) -> tuple[bool, bool]:
+delta: dict = {  # 押下キーと移動量の対応辞書
+    pg.K_UP: (0, -5),
+    pg.K_DOWN: (0, +5),
+    pg.K_LEFT: (-5, 0),
+    pg.K_RIGHT: (+5, 0)
+}
+
+
+
+def chek_bound(obj: pg.Rect) -> tuple[bool, bool]:
     """
     オブジェクトが画面内か画面外かを判定し、真偽値タプルを返す
-    引数1 area: 画面SurfaceのRect
-    引数2 obj: オブジェクト（爆弾、こうかとん）SurfaceのRectオブジェクト
+    引数 obj: オブジェクト（爆弾、こうかとん）SurfaceのRectオブジェクト
     戻り値: 横方向, 縦方向のはみ出し判定結果（画面内:True/画面外:False）
     """
     width, height = True, True
-    if obj.left < area.left or area.right < obj.right: #  横方向のはみ出し判定
+    if obj.left < 0 or WIDTH < obj.right: #  横方向のはみ出し判定
         width = False
-    if obj.top < area.top or area.bottom < obj.bottom: #  縦方向のはみ出し判定
+    if obj.top < 0 or HEIGHT < obj.bottom: #  縦方向のはみ出し判定
         height = False
     return width, height
 
@@ -26,13 +34,28 @@ def main():
 
     # 背景
     bg_img = pg.image.load("ex02/fig/pg_bg.jpg")
-    bg_rect = bg_img.get_rect()
 
     # こうかとん
     kk_img = pg.image.load("ex02/fig/3.png")
     kk_img = pg.transform.rotozoom(kk_img, 0, 2.0)
     kk_rect = kk_img.get_rect()
     kk_rect.center = (900, 400)
+    kk_img_r = pg.transform.flip(kk_img, True, False)
+
+    # 押下キーとrotozoomした画像の対応辞書
+    kk_imgs: dict = {
+    (0, 0): pg.transform.rotozoom(kk_img, 0, 1.0),
+    (-5, +5): pg.transform.rotozoom(kk_img, -315, 1.0),
+    (-5, 0): pg.transform.rotozoom(kk_img, 0, 1.0),
+    (-5, -5): pg.transform.rotozoom(kk_img, -45, 1.0),
+
+    (0, -5): pg.transform.rotozoom(kk_img_r, 90, 1.0),
+    (+5, -5): pg.transform.rotozoom(kk_img_r, 45, 1.0),
+    (+5, 0): pg.transform.rotozoom(kk_img_r, 0, 1.0),
+    (+5, +5): pg.transform.rotozoom(kk_img_r, 315, 1.0),
+    (0, +5): pg.transform.rotozoom(kk_img_r, 270, 1.0),
+
+    }
 
     # 爆弾
     bomb_img = pg.Surface((20, 20))
@@ -44,12 +67,6 @@ def main():
         random.randint(0 + bomb_rect.height // 2, HEIGHT - bomb_rect.height // 2)
     )
 
-    kk_move = {  # 押下キーと移動量の対応辞書
-        pg.K_UP: (0, -5),
-        pg.K_DOWN: (0, +5),
-        pg.K_LEFT: (-5, 0),
-        pg.K_RIGHT: (+5, 0)
-    }
 
     clock = pg.time.Clock()
     tmr = 0
@@ -62,31 +79,33 @@ def main():
         screen.blit(bg_img, [0, 0])  # 背景の描画
 
         # こうかとんの移動
-        pos = kk_rect.center
         key_list = pg.key.get_pressed() # 押下状態押下状態リスト
-        合計移動量 = [0, 0]
         # 押下キーと移動量辞書から合計移動量を求める
-        for key in kk_move: 
+        sum_mv = [0, 0]
+        for key, mv in delta.items():
             if key_list[key]:
-                合計移動量[0] += kk_move[key][0]
-                合計移動量[1] += kk_move[key][1]
-        kk_rect.move_ip(合計移動量)
+                sum_mv[0] += mv[0]
+                sum_mv[1] += mv[1]
+        kk_rect.move_ip(sum_mv)
         # 更新後の位置が画面外になった場合、更新前の座標に戻す
-        if (not chek_bound(bg_rect, kk_rect)[0]) or (not chek_bound(bg_rect, kk_rect)[1]):
-            kk_rect.center = pos
+        if chek_bound(kk_rect) != (True, True):
+            kk_rect.move_ip([-sum_mv[0], -sum_mv[1]])
         
-        screen.blit(kk_img, kk_rect)  # こうかとんの描画
+        # 押下キーに応じたrotozoomした画像を描画
+        screen.blit(kk_imgs[tuple(sum_mv)], kk_rect)  # こうかとんの描画
 
         # 更新後の位置が画面外になった場合、移動量を反転する
-        if not chek_bound(bg_rect, bomb_rect)[0]:
+        width, height = chek_bound(bomb_rect)
+        if not width:  # 横方向に画面外だったら
             vx *= -1
-        if not chek_bound(bg_rect, bomb_rect)[1]:
+        if not height:  # 縦方向に画面外だったら
             vy *= -1
         bomb_rect.move_ip(vx, vy)  # 爆弾の移動
         screen.blit(bomb_img, bomb_rect)  # 爆弾の描画
 
         # こうかとんと爆弾の衝突判定
         if kk_rect.colliderect(bomb_rect):
+            print("GAME OVER")
             return 
 
         pg.display.update()
