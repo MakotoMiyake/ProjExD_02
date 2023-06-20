@@ -116,6 +116,7 @@ def main():
         else:
             screen.blit(kk_imgs[tuple(sum_mv)], kk_rect)  # こうかとんの描画
         
+        # ゲームオーバー処理
         if goflag:
             print("GAME OVER")
             screen.blit(kk_img_go, kk_rect)  # ゲームオーバーこうかとんの描画
