@@ -85,6 +85,10 @@ def main():
         bomb_rect.move_ip(vx, vy)  # 爆弾の移動
         screen.blit(bomb_img, bomb_rect)  # 爆弾の描画
 
+        # こうかとんと爆弾の衝突判定
+        if kk_rect.colliderect(bomb_rect):
+            return 
+
         pg.display.update()
         tmr += 1
         clock.tick(50)
