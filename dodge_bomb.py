@@ -1,3 +1,4 @@
+import random
 import sys
 import pygame as pg
 
@@ -11,6 +12,12 @@ def main():
     bg_img = pg.image.load("ex02/fig/pg_bg.jpg")
     kk_img = pg.image.load("ex02/fig/3.png")
     kk_img = pg.transform.rotozoom(kk_img, 0, 2.0)
+
+    enn = pg.Surface((20, 20))
+    pg.draw.circle(enn, (255, 0, 0), (10,10), 10)
+    enn.set_colorkey((0, 0, 0))
+    loc = [random.randint(0, WIDTH-20), random.randint(0, HEIGHT-20)]
+
     clock = pg.time.Clock()
     tmr = 0
     while True:
