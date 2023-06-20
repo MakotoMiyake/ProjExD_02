@@ -13,7 +13,7 @@ delta: dict = {  # 押下キーと移動量の対応辞書
     pg.K_RIGHT: (+5, 0)
 }
 
-accs = [a for a in range(1, 11)]
+accs = [a for a in range(1, 11)] #  加速度リスト
 
 def check_bound(obj: pg.Rect) -> tuple[bool, bool]:
     """
@@ -48,13 +48,13 @@ def main():
     kk_imgs: dict = {
     (0, 0): pg.transform.rotozoom(kk_img, 0, 1.0),
     (-5, 0): pg.transform.rotozoom(kk_img, 0, 1.0),
-    (-5, +5): pg.transform.rotozoom(kk_img, -315, 1.0),
+    (-5, +5): pg.transform.rotozoom(kk_img, 45, 1.0),
     (-5, -5): pg.transform.rotozoom(kk_img, -45, 1.0),
     (0, -5): pg.transform.rotozoom(kk_img_r, 90, 1.0),
     (+5, -5): pg.transform.rotozoom(kk_img_r, 45, 1.0),
     (+5, 0): pg.transform.rotozoom(kk_img_r, 0, 1.0),
-    (+5, +5): pg.transform.rotozoom(kk_img_r, 315, 1.0),
-    (0, +5): pg.transform.rotozoom(kk_img_r, 270, 1.0),
+    (+5, +5): pg.transform.rotozoom(kk_img_r, -45, 1.0),
+    (0, +5): pg.transform.rotozoom(kk_img_r, -90, 1.0),
     }
 
     # 爆弾
