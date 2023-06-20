@@ -13,7 +13,7 @@ delta: dict = {  # 押下キーと移動量の対応辞書
     pg.K_RIGHT: (+5, 0)
 }
 
-
+accs = [a for a in range(1, 11)]  # 加速度リスト
 
 def chek_bound(obj: pg.Rect) -> tuple[bool, bool]:
     """
@@ -45,16 +45,14 @@ def main():
     # 押下キーとrotozoomした画像の対応辞書
     kk_imgs: dict = {
     (0, 0): pg.transform.rotozoom(kk_img, 0, 1.0),
-    (-5, +5): pg.transform.rotozoom(kk_img, -315, 1.0),
     (-5, 0): pg.transform.rotozoom(kk_img, 0, 1.0),
+    (-5, +5): pg.transform.rotozoom(kk_img, -315, 1.0),
     (-5, -5): pg.transform.rotozoom(kk_img, -45, 1.0),
-
     (0, -5): pg.transform.rotozoom(kk_img_r, 90, 1.0),
     (+5, -5): pg.transform.rotozoom(kk_img_r, 45, 1.0),
     (+5, 0): pg.transform.rotozoom(kk_img_r, 0, 1.0),
     (+5, +5): pg.transform.rotozoom(kk_img_r, 315, 1.0),
     (0, +5): pg.transform.rotozoom(kk_img_r, 270, 1.0),
-
     }
 
     # 爆弾
@@ -67,6 +65,13 @@ def main():
         random.randint(0 + bomb_rect.height // 2, HEIGHT - bomb_rect.height // 2)
     )
 
+    # 拡大爆弾Surfaceのリスト
+    bomb_imgs: list = []
+    for r in range(1, 11):
+        bomb_img = pg.Surface((20 * r, 20 * r))
+        pg.draw.circle(bomb_img, (255, 0, 0), (10 * r, 10 * r), 10 * r)
+        bomb_img.set_colorkey((0, 0, 0))
+        bomb_imgs.append(bomb_img)
 
     clock = pg.time.Clock()
     tmr = 0
@@ -101,6 +106,9 @@ def main():
         if not height:  # 縦方向に画面外だったら
             vy *= -1
         bomb_rect.move_ip(vx, vy)  # 爆弾の移動
+        # avx, avy = vx*accs[min(tmr//500, 9)], vy*accs[min(tmr//500, 9)]  # 加速度
+        # bomb_rect.move_ip(avx, avy)  # 爆弾の加速度移動
+        bomb_img = bomb_imgs[min(tmr//500, 9)]  # 爆弾の拡大
         screen.blit(bomb_img, bomb_rect)  # 爆弾の描画
 
         # こうかとんと爆弾の衝突判定
